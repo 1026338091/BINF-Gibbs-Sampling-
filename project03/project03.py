@@ -30,71 +30,49 @@ def GibbsMotifFinder(seqs, k, seed=None):
     '''
     Function to find a pfm from a list of strings using a Gibbs sampler
 
-    Args:
-        seqs (str list): a list of sequences, not necessarily in same lengths
-        k (int): the length of motif to find
-        seed (int, default=None): seed for np.random
-
-    Returns:
-        pfm (numpy array): dimensions are 4xlength
     '''
-    # Use rng to make random samples/selections/numbers
-    # Example: randint = rng.integer(1, 10)
-    random.seed(seed)
-    rng = np.random.default_rng(seed)
 
-    # first we'll want to choose our random motifs from the list for each seq (motifs = choose_motifs(seqs, k, rng))
-    motifs = choose_motifs(seqs, k, rng)
-    # calculate a pfm with pfm_builder (pfm = pfm_builder(seqs, length))
-    pfm = build_pfm(motifs, k)
-    print(pfm)
-
-    # calculate a pwm with the pfm and pwm_builder (new_pwm = build_pwm(pmf))
-    pwm = build_pwm(pfm)
-    # where this needs to be an iterative process of unknown duration we could pick a stopping point like 10000 (i.e. if we're still going after 10,000 iterations let's stop)
-    # could do a for i in range(x):
-    for i in range(10001):
-        moving_list = []
-        # pick a random motif from the motifs (motifs = random_seq(motifs, rng))
-        motif, random_int = random_seq(motifs, rng)
-        # remove the sequence from both the motif list and the seqs list
-        for j in range(len(motifs)):
-            if j != random_int:
-                moving_list.append(motifs[j])
-
-        pfm = build_pfm(moving_list, 10)
-        pwm - build_pwm(pfm)
-
-
-        # every time we've iterated through say, 100 times:
-        if i % 100 == 0 and i > 0:
-
-            # compare the information content of the new pfm to the old pfm (old pfm should be one iteration behind):
-            old_ifc = pfm_ic(pfm)
-            pfm = build_pfm(moving_list, 10)
-            pwm = build_pwm(pfm)
-            new_ifc = pfm_ic(pfm)
-
-            if math.isclose(new_ifc, old_ifc) == True:
-                return pfm
+    # 2000 for test
+    for i in range(2000):
+        
+        # random choose
+        idx = rng.integers(0, len(seqs))
+        
+        # Motifs 
+        # remove the motif
+        # use pop() to grasp
+        current_motifs = motifs.copy() 
+        current_motifs.pop(idx)
+        
+        # caculate the new pfm pwm
+        temp_pfm = build_pfm(current_motifs, k)
+        temp_pwm = build_pwm(temp_pfm)
+        
+        # scan the choosen seq by the temp_pwm (both posti and rev)
+        target_seq = seqs[idx]
+        target_seq_rev = reverse_complement(target_seq)
+        
+        # get_all_scores
+        scores, candidates = get_all_scores(target_seq, target_seq_rev, k, temp_pwm)
+        
+        # new Motif
+        
+        new_motif_list = select_motif(scores, candidates)
+        new_motif = new_motif_list[0]
+        
+        # put back new motif
+        motifs[idx] = new_motif
+        
+        # check each 100 times to find out if IC was developing?
+        if i % 100 == 0:
+            current_pfm = build_pfm(motifs, k)
+            current_ic = pfm_ic(current_pfm)
+            print(f"Iteration {i}, IC Score: {current_ic:.4f}")
 
 
-        seq = seqs[random_int]
-        # get the reverse_strand of the left out sequence with reverse_complement - use index created above to choose seq
-        rev_seq = reverse_complement(seq)
-        # get scores of all the motifs of the left out sequence with get_all_scores (use seqs[i] and the reverse strand, using the index from above)
-        scores, seq_motifs = get_all_scores(seq, rev_seq, k, pwm)
-        # choose the motif with select_motif
-        new_motif = select_motif(scores, seq_motifs)
-        motifs[random_int] = new_motif[0]
-        # if the motif came from the reverse strand, replace it in the full seq pool by the random int value
-        if seq_motifs.index(new_motif[0]) % 2 == 1:
-            seqs[random_int] = rev_seq
-
-
-
-    # if we reached the end of the loop, return the pfm
-    return pfm
+    # use converge motifs to build PFM 
+    final_pfm = build_pfm(motifs, k)
+    return final_pfm
 
 
 def choose_motifs(seqs, k, rng):
