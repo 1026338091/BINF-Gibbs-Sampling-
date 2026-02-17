@@ -1,5 +1,5 @@
 # Introduction
-Description of the project
+This project implements a Gibbs Sampling algorithm to identify transcription factor binding sites (motifs) from ChIP-seq data, utilizing a simplified Peak Calling strategy to enhance signal-to-noise ratio. By iteratively updating Position Weight Matrices (PWMs) and employing probabilistic sampling on both strands, the model converges to identifying statistically significant sequence patterns. The final results are visualized via Sequence Logos, demonstrating the efficacy of stochastic methods in uncovering hidden biological signals within complex genomic backgrounds.
 
 # Pseudocode
 What we know about the algorithm:
@@ -209,7 +209,7 @@ Our last struggle was determining how to assign probabilities based on the pwm s
 My biggest takeaway from this project is how crucial it is to break down problems, ideas, and algorithmic implementation into their smallest and most essential parts. There was a lot going on in this algorithm/method, and if I tried to digest it as whole, even now that I understand it better, I would get lost very quickly. However, taking the problem step by step - first going through each step in gibbs sampling with pen and paper, and then doing conversion into pseudocode, and only then into actual code made it doable and understandable. In regards to actual implementation the most helpful thing was indentiying what steps had to happen every iteration (or every x iterations for the comparison of matrices) and seperating those steps into their own functions if possible or necessary. Instead of exposing all operations of each sub-component of the iteration it allowed us to call the sub-component in the form of a function, which I found helpful for readability and debugging purposes.
 
 ## Other member
-Other members' reflections on the project
+Hongyuan Deng：Through this project, I gained a deep understanding of stochastic algorithms, specifically fixing critical errors in log-likelihood probability conversion and iterative model convergence. I also learned to bridge the gap between raw data and algorithm efficiency by applying a simplified peak-calling heuristic to reduce noise in the input dataset.
 
 # Generative AI Appendix
 No AI was used for the creation of this project.
